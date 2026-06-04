@@ -116,5 +116,9 @@ Max error: 1 px | Mean error: 0.09 px
   [guardado] results/chars_originales.png
   [guardado] results/chars_reconstruidos.png
   [guardado] results/espacio_latente.png
+  [guardado] results/latente_miniaturas.png
+  [guardado] results/reconstruccion_continua.png
+  [guardado] results/error_detalle.png
+  [guardado] results/generacion_grilla_nn.png
   [guardado] results/generacion_grilla.png
   [guardado] results/generacion_interpolacion.png
