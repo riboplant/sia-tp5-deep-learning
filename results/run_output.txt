@@ -1,0 +1,120 @@
+Dataset cargado: 32 muestras de 35 features
+
+============================================================
+EXPERIMENTO 1: Arquitectura (BCE + Adam lr=1e-3)
+============================================================
+
+--- Shallow (35-16-2) ---
+  Epoch   5000 | loss: 0.06965 | max px err: 5
+  Convergido en epoch 8714 | loss: 0.02609
+
+--- Deep (35-32-16-8-2) ---
+  Convergido en epoch 2979 | loss: 0.02533
+  [guardado] results/exp1_arquitectura.png
+
+Configuración                  Convergencia    Loss final      Max err final
+---------------------------------------------------------------------------
+Shallow (35-16-2)              8714            0.02609         1
+Deep (35-32-16-8-2)            2979            0.02533         1
+
+Mejor arquitectura: Deep (35-32-16-8-2)
+
+============================================================
+EXPERIMENTO 2: Loss function (Deep (35-32-16-8-2) + Adam lr=1e-3)
+============================================================
+
+--- BCE ---
+  Convergido en epoch 2979 | loss: 0.02533
+
+--- MSE ---
+  Epoch   5000 | loss: 0.00686 | max px err: 2
+  Epoch  10000 | loss: 0.00836 | max px err: 3
+  Epoch  15000 | loss: 0.00807 | max px err: 3
+  Epoch  20000 | loss: 0.00722 | max px err: 3
+  Epoch  25000 | loss: 0.00715 | max px err: 3
+  Epoch  30000 | loss: 0.00714 | max px err: 3
+  Epoch  35000 | loss: 0.01064 | max px err: 4
+  Epoch  40000 | loss: 0.00812 | max px err: 3
+  Epoch  45000 | loss: 0.00804 | max px err: 3
+  Epoch  50000 | loss: 0.00804 | max px err: 3
+  [guardado] results/exp2_loss.png
+
+Configuración                  Convergencia    Loss final      Max err final
+---------------------------------------------------------------------------
+BCE                            2979            0.02533         1
+MSE                            No convergió    0.00804         3
+
+Mejor loss: BCE
+
+============================================================
+EXPERIMENTO 3: Optimizador (Deep (35-32-16-8-2) + BCE)
+============================================================
+
+--- Adam (lr=1e-3) ---
+  Convergido en epoch 2979 | loss: 0.02533
+
+--- SGD (lr=0.01, mom=0.9) ---
+  Epoch   5000 | loss: 0.34385 | max px err: 10
+  Epoch  10000 | loss: 0.24309 | max px err: 7
+  Epoch  15000 | loss: 0.17491 | max px err: 6
+  Epoch  20000 | loss: 0.12869 | max px err: 5
+  Epoch  25000 | loss: 0.09771 | max px err: 4
+  Epoch  30000 | loss: 0.07775 | max px err: 3
+  Epoch  35000 | loss: 0.06445 | max px err: 2
+  Epoch  40000 | loss: 0.05448 | max px err: 2
+  Convergido en epoch 40611 | loss: 0.05344
+  [guardado] results/exp3_optimizador.png
+
+Configuración                  Convergencia    Loss final      Max err final
+---------------------------------------------------------------------------
+Adam (lr=1e-3)                 2979            0.02533         1
+SGD (lr=0.01, mom=0.9)         40611           0.05344         1
+
+Mejor optimizador: Adam (lr=1e-3)
+
+Configuracion optima: Deep (35-32-16-8-2) + BCE + Adam (lr=1e-3)
+
+============================================================
+ANÁLISIS DEL MEJOR MODELO
+============================================================
+
+Error por carácter:
+  '`': 0 px
+  'a': 0 px
+  'b': 0 px
+  'c': 0 px
+  'd': 0 px
+  'e': 0 px
+  'f': 0 px
+  'g': 0 px
+  'h': 0 px
+  'i': 0 px
+  'j': 0 px
+  'k': 0 px
+  'l': 0 px
+  'm': 1 px
+  'n': 0 px
+  'o': 1 px
+  'p': 0 px
+  'q': 0 px
+  'r': 1 px
+  's': 0 px
+  't': 0 px
+  'u': 0 px
+  'v': 0 px
+  'w': 0 px
+  'x': 0 px
+  'y': 0 px
+  'z': 0 px
+  '{': 0 px
+  '|': 0 px
+  '}': 0 px
+  '~': 0 px
+  'DEL': 0 px
+
+Max error: 1 px | Mean error: 0.09 px
+  [guardado] results/chars_originales.png
+  [guardado] results/chars_reconstruidos.png
+  [guardado] results/espacio_latente.png
+  [guardado] results/generacion_grilla.png
+  [guardado] results/generacion_interpolacion.png
