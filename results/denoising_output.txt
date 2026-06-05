@@ -1,0 +1,163 @@
+Dataset: 32 muestras de 35 features
+  [guardado] results/dn_noise_sp.png
+  [guardado] results/dn_noise_masking.png
+
+============================================================
+Ruido: Salt & Pepper | Arquitectura: Deep (35-32-16-8-2)
+============================================================
+
+  --- p=0.05 ---
+  Epoch   5000 | loss: 0.13269 | max px err: 10
+  Epoch  10000 | loss: 0.02643 | max px err: 2
+  Convergido en epoch 10108 | loss: 0.02759
+
+  --- p=0.1 ---
+  Epoch   5000 | loss: 0.13244 | max px err: 5
+  Epoch  10000 | loss: 0.09591 | max px err: 10
+  Epoch  15000 | loss: 0.13251 | max px err: 16
+  Epoch  20000 | loss: 0.04120 | max px err: 6
+  Epoch  25000 | loss: 0.09969 | max px err: 11
+  Epoch  30000 | loss: 0.03670 | max px err: 6
+  Epoch  35000 | loss: 0.09696 | max px err: 10
+  Convergido en epoch 39234 | loss: 0.02541
+
+  --- p=0.2 ---
+  Epoch   5000 | loss: 0.37252 | max px err: 15
+  Epoch  10000 | loss: 0.34012 | max px err: 23
+  Epoch  15000 | loss: 0.28495 | max px err: 14
+  Epoch  20000 | loss: 0.31335 | max px err: 14
+  Epoch  25000 | loss: 0.20263 | max px err: 15
+  Epoch  30000 | loss: 0.29673 | max px err: 15
+  Epoch  35000 | loss: 0.21096 | max px err: 12
+  Epoch  40000 | loss: 0.29735 | max px err: 16
+  Epoch  45000 | loss: 0.27184 | max px err: 16
+  Epoch  50000 | loss: 0.16276 | max px err: 13
+
+  --- p=0.3 ---
+  Epoch   5000 | loss: 0.51806 | max px err: 17
+  Epoch  10000 | loss: 0.48372 | max px err: 27
+  Epoch  15000 | loss: 0.47668 | max px err: 17
+  Epoch  20000 | loss: 0.47798 | max px err: 19
+  Epoch  25000 | loss: 0.48477 | max px err: 17
+  Epoch  30000 | loss: 0.42152 | max px err: 13
+  Epoch  35000 | loss: 0.48526 | max px err: 19
+  Epoch  40000 | loss: 0.49801 | max px err: 25
+  Epoch  45000 | loss: 0.40113 | max px err: 14
+  Epoch  50000 | loss: 0.39955 | max px err: 14
+
+  --- p=0.5 ---
+  Epoch   5000 | loss: 0.59448 | max px err: 32
+  Epoch  10000 | loss: 0.59435 | max px err: 34
+  Epoch  15000 | loss: 0.59435 | max px err: 33
+  Epoch  20000 | loss: 0.59435 | max px err: 32
+  Epoch  25000 | loss: 0.59444 | max px err: 32
+  Epoch  30000 | loss: 0.59435 | max px err: 33
+  Epoch  35000 | loss: 0.59435 | max px err: 31
+  Epoch  40000 | loss: 0.59436 | max px err: 31
+  Epoch  45000 | loss: 0.59435 | max px err: 32
+  Epoch  50000 | loss: 0.59435 | max px err: 33
+  [guardado] results/dn_sp_deep_training.png
+
+Nivel      Convergencia    Loss final      Max err final
+-------------------------------------------------------
+p=0.05     10108           0.02759         1
+p=0.1      39234           0.02541         1
+p=0.2      No convergió    0.16276         13
+p=0.3      No convergió    0.39955         14
+p=0.5      No convergió    0.59435         33
+
+  [!] Algunos niveles no convergieron con Deep — reintentando con Deep Wide
+
+============================================================
+Ruido: Salt & Pepper | Arquitectura: Deep Wide (35-64-32-16-2)
+============================================================
+
+  --- p=0.05 ---
+  Convergido en epoch 2326 | loss: 0.03799
+
+  --- p=0.1 ---
+  Convergido en epoch 4254 | loss: 0.04519
+
+  --- p=0.2 ---
+  Epoch   5000 | loss: 0.28913 | max px err: 17
+  Epoch  10000 | loss: 0.19811 | max px err: 14
+  Epoch  15000 | loss: 0.22221 | max px err: 15
+  Epoch  20000 | loss: 0.26553 | max px err: 15
+  Epoch  25000 | loss: 0.17927 | max px err: 17
+  Epoch  30000 | loss: 0.27502 | max px err: 16
+  Epoch  35000 | loss: 0.20094 | max px err: 13
+  Epoch  40000 | loss: 0.22518 | max px err: 15
+  Epoch  45000 | loss: 0.20715 | max px err: 14
+  Epoch  50000 | loss: 0.13813 | max px err: 13
+
+  --- p=0.3 ---
+  Epoch   5000 | loss: 0.51728 | max px err: 21
+  Epoch  10000 | loss: 0.42242 | max px err: 17
+  Epoch  15000 | loss: 0.45729 | max px err: 16
+  Epoch  20000 | loss: 0.44685 | max px err: 16
+  Epoch  25000 | loss: 0.44625 | max px err: 16
+  Epoch  30000 | loss: 0.43152 | max px err: 14
+  Epoch  35000 | loss: 0.44318 | max px err: 19
+  Epoch  40000 | loss: 0.42588 | max px err: 16
+  Epoch  45000 | loss: 0.37652 | max px err: 21
+  Epoch  50000 | loss: 0.36460 | max px err: 15
+
+  --- p=0.5 ---
+  Epoch   5000 | loss: 0.59434 | max px err: 33
+  Epoch  10000 | loss: 0.59435 | max px err: 32
+  Epoch  15000 | loss: 0.59435 | max px err: 33
+  Epoch  20000 | loss: 0.59435 | max px err: 32
+  Epoch  25000 | loss: 0.59436 | max px err: 31
+  Epoch  30000 | loss: 0.59435 | max px err: 32
+  Epoch  35000 | loss: 0.59435 | max px err: 33
+  Epoch  40000 | loss: 0.59435 | max px err: 32
+  Epoch  45000 | loss: 0.59435 | max px err: 33
+  Epoch  50000 | loss: 0.59435 | max px err: 34
+  [guardado] results/dn_sp_wide_training.png
+
+Nivel      Convergencia    Loss final      Max err final
+-------------------------------------------------------
+p=0.05     2326            0.03799         1
+p=0.1      4254            0.04519         1
+p=0.2      No convergió    0.13813         13
+p=0.3      No convergió    0.36460         15
+p=0.5      No convergió    0.59435         34
+
+============================================================
+Ruido: Masking | Arquitectura: Deep Wide
+============================================================
+
+  --- p=0.05 ---
+  Convergido en epoch 1328 | loss: 0.05259
+
+  --- p=0.1 ---
+  Convergido en epoch 1408 | loss: 0.06201
+
+  --- p=0.2 ---
+  Convergido en epoch 1923 | loss: 0.05321
+
+  --- p=0.3 ---
+  Convergido en epoch 3608 | loss: 0.04568
+
+  --- p=0.5 ---
+  Epoch   5000 | loss: 0.25515 | max px err: 16
+  Epoch  10000 | loss: 0.16154 | max px err: 16
+  Convergido en epoch 12762 | loss: 0.04218
+  [guardado] results/dn_masking_training.png
+
+Nivel      Convergencia    Loss final      Max err final
+-------------------------------------------------------
+p=0.05     1328            0.05259         1
+p=0.1      1408            0.06201         1
+p=0.2      1923            0.05321         1
+p=0.3      3608            0.04568         1
+p=0.5      12762           0.04218         1
+  [guardado] results/dn_comparison.png
+
+Mejor modelo Salt & Pepper: p=0.1
+  [guardado] results/dn_sp_reconstructions.png
+Mejor modelo Masking: p=0.5
+  [guardado] results/dn_masking_reconstructions.png
+
+Espacio latente — modelo Salt & Pepper con mayor nivel de ruido convergido
+  [guardado] results/dn_latent_sp_p0.1.png

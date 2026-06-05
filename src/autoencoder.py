@@ -59,3 +59,23 @@ def build_deep(seed: int = 42) -> Autoencoder:
             Dense(32, 35), Sigmoid(),
         ]),
     )
+
+
+def build_deep_wide(seed: int = 42) -> Autoencoder:
+    """Arquitectura wide: 35 -> 64 -> 32 -> 16 -> 2 -> 16 -> 32 -> 64 -> 35
+    Mayor capacidad en capas ocultas para tareas de denoising más agresivas."""
+    np.random.seed(seed)
+    return Autoencoder(
+        encoder=Network([
+            Dense(35, 64), Tanh(),
+            Dense(64, 32), Tanh(),
+            Dense(32, 16), Tanh(),
+            Dense(16, 2),
+        ]),
+        decoder=Network([
+            Dense(2, 16),  Tanh(),
+            Dense(16, 32), Tanh(),
+            Dense(32, 64), Tanh(),
+            Dense(64, 35), Sigmoid(),
+        ]),
+    )

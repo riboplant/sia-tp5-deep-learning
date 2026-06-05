@@ -5,7 +5,15 @@ from src.autoencoder import build_shallow, build_deep
 from src.losses import BCE, MSE
 from src.optimizers import Adam, SGD
 from src.training import train, pixel_error
-from src.visualization import plot_chars, plot_training, plot_latent_space
+from src.visualization import (
+    plot_chars,
+    plot_training,
+    plot_latent_space,
+    plot_latent_thumbnails,
+    plot_continuous_reconstruction,
+    plot_pixel_error_detail,
+    plot_generative_grid_nn,
+)
 
 SEED = 42
 MAX_EPOCHS = 50_000
@@ -95,7 +103,15 @@ def analyze_best_model(model, data: np.ndarray, labels: list[str]) -> None:
                title="Reconstruidos (umbral 0.5)", filename="chars_reconstruidos.png")
 
     latent = model.encode(data)
+
+    # Visualizaciones estándar
     plot_latent_space(latent, labels, filename="espacio_latente.png")
+
+    # Visualizaciones adicionales
+    plot_latent_thumbnails(latent, data, labels, filename="latente_miniaturas.png")
+    plot_continuous_reconstruction(data, reconstructed, labels, filename="reconstruccion_continua.png")
+    plot_pixel_error_detail(data, reconstructed, labels, filename="error_detalle.png")
+    plot_generative_grid_nn(model, latent, labels, n=12, filename="generacion_grilla_nn.png")
 
     _generate_new_chars(model, data, labels, latent)
 
