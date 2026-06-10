@@ -1,0 +1,29 @@
+Dataset: 54 caras de 81 píxeles (9×9)
+  [guardado] results/vae_dataset.png
+
+Entrenando VAE (β=0.01, warmup=5000, max_epochs=100000)...
+  Convergido en epoch 3372 | loss: 0.03272
+
+Resultado VAE: convergió en época 3372
+  Loss final  : 0.03272
+  Recon final : 0.01472
+  KL final    : 1.79969
+  Max px err  : 1
+  [guardado] results/vae_training.png
+
+Error de reconstrucción — max: 2 px | mean: 0.48 px
+  [guardado] results/vae_reconstructions.png
+  [guardado] results/vae_latent.png
+  [guardado] results/vae_latent_attrs.png
+
+Generando caras nuevas desde el prior N(0,I)...
+  [guardado] results/vae_samples_prior.png
+  [guardado] results/vae_interp_feliz_triste.png
+  [guardado] results/vae_interp_sin_anteojos_con_anteojos.png
+  [guardado] results/vae_interp_ojos_abiertos_ojos_cerrados.png
+
+Entrenando AE básico para comparación...
+  Convergido en epoch 3651 | loss: 0.01116
+  [guardado] results/vae_vs_ae.png
+
+Finalizado. Todas las figuras guardadas en results/

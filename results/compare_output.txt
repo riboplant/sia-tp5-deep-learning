@@ -1,0 +1,16 @@
+Dataset: 54 caras de 81 píxeles
+
+Entrenando AE básico...
+  Convergido en epoch 3651 | loss: 0.01116
+
+Entrenando VAE...
+  Convergido en epoch 3372 | loss: 0.03272
+
+Experimento A: estructura del espacio latente...
+  [guardado] results/cmp_latent_structure.png
+Experimento B: grid decode...
+  [guardado] results/cmp_grid_decode.png
+Experimento C: interpolación...
+  [guardado] results/cmp_interpolation.png
+
+Listo. Figuras guardadas en results/

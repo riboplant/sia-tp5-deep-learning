@@ -61,6 +61,47 @@ def build_deep(seed: int = 42) -> Autoencoder:
     )
 
 
+def build_olivetti(
+    input_dim: int,
+    latent_dim: int,
+    arch: str = "medium",
+    seed: int = 42,
+) -> Autoencoder:
+    """
+    Autoencoder para entradas de escala Olivetti (1024–4096 px).
+
+    Arquitecturas:
+      shallow: input → 256 → 128 → latent
+      medium:  input → 512 → 256 → 128 → latent
+      deep:    input → 512 → 256 → 128 → 64 → latent
+    """
+    np.random.seed(seed)
+    _dims = {
+        "shallow": [256, 128],
+        "medium":  [512, 256, 128],
+        "deep":    [512, 256, 128, 64],
+    }
+    if arch not in _dims:
+        raise ValueError(f"arch debe ser uno de {list(_dims)}")
+    dims = _dims[arch]
+
+    enc_layers = []
+    prev = input_dim
+    for d in dims:
+        enc_layers += [Dense(prev, d), Tanh()]
+        prev = d
+    enc_layers.append(Dense(prev, latent_dim))
+
+    dec_layers = []
+    prev = latent_dim
+    for d in reversed(dims):
+        dec_layers += [Dense(prev, d), Tanh()]
+        prev = d
+    dec_layers += [Dense(prev, input_dim), Sigmoid()]
+
+    return Autoencoder(encoder=Network(enc_layers), decoder=Network(dec_layers))
+
+
 def build_deep_wide(seed: int = 42) -> Autoencoder:
     """Arquitectura wide: 35 -> 64 -> 32 -> 16 -> 2 -> 16 -> 32 -> 64 -> 35
     Mayor capacidad en capas ocultas para tareas de denoising más agresivas."""
