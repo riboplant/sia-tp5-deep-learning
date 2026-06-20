@@ -27,27 +27,31 @@ class BCE:
 
 class VAELoss:
     """
-    ELBO para VAE:  L = BCE(x̂, x)  +  β · KL(q(z|x) || N(0,I))
+    ELBO para VAE:  L = recon(x̂, x)  +  β · KL(q(z|x) || N(0,I))
 
+    recon puede ser "bce" (datos binarios) o "mse" (datos continuos en [0,1]).
     El gradiente del término KL lo maneja VAE.backward() internamente.
-    Esta clase solo expone el valor escalar total y el gradiente de reconstrucción.
 
     KL en forma cerrada:  KL = -½ · mean(1 + logvar - μ² - exp(logvar))
     """
 
-    _bce = BCE()
-
-    def __init__(self, beta: float = 1.0) -> None:
+    def __init__(self, beta: float = 1.0, recon: str = "bce") -> None:
         self.beta = beta
+        if recon == "bce":
+            self._recon_fn = BCE()
+        elif recon == "mse":
+            self._recon_fn = MSE()
+        else:
+            raise ValueError(f"recon debe ser 'bce' o 'mse', recibido: {recon!r}")
         self.last_recon: float = 0.0
         self.last_kl:    float = 0.0
 
     def __call__(self, y_hat: np.ndarray, y: np.ndarray,
                  mu: np.ndarray, logvar: np.ndarray) -> float:
-        self.last_recon = self._bce(y_hat, y)
+        self.last_recon = self._recon_fn(y_hat, y)
         self.last_kl    = float(-0.5 * np.mean(1.0 + logvar - mu ** 2 - np.exp(logvar)))
         return self.last_recon + self.beta * self.last_kl
 
     def grad(self, y_hat: np.ndarray, y: np.ndarray) -> np.ndarray:
         """Solo el gradiente de reconstrucción — el KL se añade en VAE.backward()."""
-        return self._bce.grad(y_hat, y)
+        return self._recon_fn.grad(y_hat, y)

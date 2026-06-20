@@ -155,6 +155,77 @@ def train_continuous(
     return history
 
 
+def train_vae_continuous(
+    model,
+    data: np.ndarray,
+    optimizer,
+    loss_fn: VAELoss,
+    epochs: int = 10_000,
+    batch_size: int = 50,
+    beta_warmup: int = 2_000,
+    seed: int = 42,
+    verbose: bool = True,
+    log_every: int = 1_000,
+    patience: int = 500,
+    tol: float = 1e-6,
+) -> dict:
+    """
+    Entrena un VAE sobre datos continuos (e.g. Olivetti) con mini-batches.
+
+    Early stopping por plateau de loss en lugar de error de píxel.
+    β sube linealmente de 0 a loss_fn.beta durante beta_warmup épocas.
+    """
+    rng = np.random.default_rng(seed)
+    beta_max = loss_fn.beta
+    history: dict = {"loss": [], "recon": [], "kl": [], "converged_at": None}
+    n = len(data)
+    best_loss = float("inf")
+    no_improve = 0
+
+    for epoch in range(1, epochs + 1):
+        beta = beta_max * min(1.0, epoch / beta_warmup)
+        indices = rng.permutation(n)
+        epoch_loss = epoch_recon = epoch_kl = 0.0
+        n_batches = 0
+
+        for start in range(0, n, batch_size):
+            batch = data[indices[start : start + batch_size]]
+            y_hat = model.forward(batch, training=True)
+            loss_val = loss_fn(y_hat, batch, model._mu, model._logvar)
+            model.backward(loss_fn.grad(y_hat, batch), beta=beta)
+            optimizer.step(model.params())
+            epoch_loss  += loss_val
+            epoch_recon += loss_fn.last_recon
+            epoch_kl    += loss_fn.last_kl
+            n_batches   += 1
+
+        epoch_loss  /= n_batches
+        epoch_recon /= n_batches
+        epoch_kl    /= n_batches
+        history["loss"].append(epoch_loss)
+        history["recon"].append(epoch_recon)
+        history["kl"].append(epoch_kl)
+
+        if verbose and epoch % log_every == 0:
+            print(
+                f"  Epoch {epoch:6d} | β={beta:.4f} | loss: {epoch_loss:.5f} "
+                f"(recon: {epoch_recon:.5f}  kl: {epoch_kl:.4f})"
+            )
+
+        if best_loss - epoch_loss > tol:
+            best_loss = epoch_loss
+            no_improve = 0
+        else:
+            no_improve += 1
+            if no_improve >= patience:
+                history["converged_at"] = epoch
+                if verbose:
+                    print(f"  Early stop epoch {epoch} | loss: {epoch_loss:.5f}")
+                break
+
+    return history
+
+
 def train_denoising(
     model: Autoencoder,
     data: np.ndarray,

@@ -76,7 +76,7 @@ def main() -> None:
     # Generación: muestreo del prior N(0,I)                               #
     # ------------------------------------------------------------------ #
     print("\nGenerando caras nuevas desde el prior N(0,I)...")
-    plot_vae_samples(vae, n=6, shape=FACE_SHAPE, filename="vae_samples_prior.png")
+    plot_vae_samples(vae, rows=1, cols=8, shape=FACE_SHAPE, filename="vae_samples_prior.png")
 
     # ------------------------------------------------------------------ #
     # Interpolaciones entre pares de caras                                 #

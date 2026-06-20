@@ -41,9 +41,10 @@ class VAE:
     Backward: gradiente de reconstrucción + gradiente de KL (analítico)
     """
 
-    def __init__(self, encoder: VAEEncoder, decoder: Network) -> None:
+    def __init__(self, encoder: VAEEncoder, decoder: Network, latent_dim: int) -> None:
         self.encoder = encoder
         self.decoder = decoder
+        self.latent_dim = latent_dim
         self._mu:     np.ndarray | None = None
         self._logvar: np.ndarray | None = None
         self._eps:    np.ndarray | None = None
@@ -119,4 +120,26 @@ def build_vae(input_dim: int = 81, latent_dim: int = 2, seed: int = 42) -> VAE:
         Dense(32, 64),                 Tanh(),
         Dense(64, input_dim),          Sigmoid(),
     ])
-    return VAE(encoder, decoder)
+    return VAE(encoder, decoder, latent_dim=latent_dim)
+
+
+def build_olivetti_vae(input_dim: int = 1024, latent_dim: int = 8, seed: int = 42) -> VAE:
+    """VAE para Olivetti Faces 32×32: arquitectura deep, espacio latente 8D.
+    Misma topología que build_olivetti(arch='deep') pero con cabezas μ/logσ."""
+    np.random.seed(seed)
+    hidden_dim = 64  # último bloque antes de las cabezas
+    body = Network([
+        Dense(input_dim, 512), Tanh(),
+        Dense(512, 256),       Tanh(),
+        Dense(256, 128),       Tanh(),
+        Dense(128, hidden_dim), Tanh(),
+    ])
+    encoder = VAEEncoder(body, hidden_dim=hidden_dim, latent_dim=latent_dim)
+    decoder = Network([
+        Dense(latent_dim, hidden_dim), Tanh(),
+        Dense(hidden_dim, 128),        Tanh(),
+        Dense(128, 256),               Tanh(),
+        Dense(256, 512),               Tanh(),
+        Dense(512, input_dim),         Sigmoid(),
+    ])
+    return VAE(encoder, decoder, latent_dim=latent_dim)

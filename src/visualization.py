@@ -517,23 +517,34 @@ def plot_latent_by_attribute(
 def plot_vae_samples(
     model,
     n: int = 5,
+    rows: int | None = None,
+    cols: int | None = None,
     shape: tuple[int, int] = (9, 9),
+    threshold: float | None = 0.5,
     filename: str | None = None,
 ) -> None:
     """
-    Samplea z ~ N(0,I) y decodifica. Muestra una grilla n×n de caras generadas
-    que no existen en el dataset de entrenamiento.
+    Samplea z ~ N(0,I) y decodifica.
+
+    Si se pasan rows/cols, genera exactamente rows×cols muestras en esa grilla.
+    Si solo se pasa n, genera una grilla n×n (comportamiento original).
+    threshold=0.5 binariza la imagen; threshold=None muestra valores continuos en escala de grises.
     """
+    r = rows if rows is not None else n
+    c = cols if cols is not None else n
     rng = np.random.default_rng(0)
-    z_samples = rng.standard_normal((n * n, 2))
+    z_samples = rng.standard_normal((r * c, model.latent_dim))
     generated = model.decode(z_samples)
 
-    fig, axes = plt.subplots(n, n, figsize=(n * 1.4, n * 1.6))
-    for i, ax in enumerate(axes.flatten()):
-        ax.imshow((generated[i] > 0.5).reshape(shape), cmap="binary", vmin=0, vmax=1)
+    fig, axes = plt.subplots(r, c, figsize=(c * 1.4, r * 1.6))
+    for i, ax in enumerate(np.array(axes).flatten()):
+        img = (generated[i] > threshold).reshape(shape) if threshold is not None \
+              else generated[i].reshape(shape)
+        cmap = "binary" if threshold is not None else "gray"
+        ax.imshow(img, cmap=cmap, vmin=0, vmax=1)
         ax.axis("off")
 
-    fig.suptitle(f"Muestras del prior N(0,I) — {n}×{n} caras generadas", fontsize=12)
+    fig.suptitle(f"Muestras del prior N(0,I) — {r}×{c} caras generadas", fontsize=12)
     plt.tight_layout()
     if filename:
         _save(filename)
@@ -548,16 +559,20 @@ def plot_face_interpolation(
     label_b: str,
     n_steps: int = 9,
     shape: tuple[int, int] = (9, 9),
+    threshold: float | None = 0.5,
     filename: str | None = None,
 ) -> None:
-    """Interpolación lineal entre dos caras en el espacio latente."""
+    """Interpolación lineal entre dos caras en el espacio latente.
+    threshold=None muestra valores continuos en escala de grises."""
     alphas = np.linspace(0, 1, n_steps)
     interp = [(1 - a) * latent[idx_a] + a * latent[idx_b] for a in alphas]
     generated = [model.decode(z.reshape(1, -1)).flatten() for z in interp]
 
+    cmap = "binary" if threshold is not None else "gray"
     fig, axes = plt.subplots(1, n_steps, figsize=(n_steps * 1.4, 2.0))
     for i, (ax, img) in enumerate(zip(axes, generated)):
-        ax.imshow((img > 0.5).reshape(shape), cmap="binary", vmin=0, vmax=1)
+        display = (img > threshold).reshape(shape) if threshold is not None else img.reshape(shape)
+        ax.imshow(display, cmap=cmap, vmin=0, vmax=1)
         ax.set_title(f"{alphas[i]:.2f}", fontsize=7)
         ax.axis("off")
 
@@ -976,5 +991,111 @@ def plot_ae_vs_vae(
 
     fig.suptitle("AE vs VAE — muestreo aleatorio del espacio latente", fontsize=12)
     plt.tight_layout()
+    if filename:
+        _save(filename)
+
+
+def plot_vae_training_continuous(
+    history: dict,
+    filename: str | None = None,
+) -> None:
+    """Curvas de entrenamiento para VAE sobre datos continuos (sin métrica de px error)."""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
+
+    ax1.semilogy(history["loss"],  label="Total",          color="black",      alpha=0.9)
+    ax1.semilogy(history["recon"], label="Reconstrucción", color="steelblue",  alpha=0.85)
+    if history.get("converged_at"):
+        ax1.axvline(history["converged_at"], color="gray", linestyle=":", alpha=0.7,
+                    label=f"Early stop (época {history['converged_at']})")
+    ax1.set(title="Pérdida total y reconstrucción (log)", xlabel="Época")
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+
+    ax2.plot(history["kl"], color="darkorange", alpha=0.85)
+    if history.get("converged_at"):
+        ax2.axvline(history["converged_at"], color="gray", linestyle=":", alpha=0.7)
+    ax2.set(title="Divergencia KL — verificar que no colapse a 0", xlabel="Época")
+    ax2.grid(True, alpha=0.3)
+
+    fig.suptitle("Entrenamiento VAE — Olivetti Faces", fontsize=13)
+    plt.tight_layout()
+    if filename:
+        _save(filename)
+
+
+def plot_ae_vs_vae_olivetti(
+    ae_model,
+    vae_model,
+    data: np.ndarray,
+    labels: np.ndarray,
+    latent_ae: np.ndarray,
+    latent_vae: np.ndarray,
+    size: int = 32,
+    n_samples: int = 8,
+    filename: str | None = None,
+) -> None:
+    """
+    Compara AE vs VAE en Olivetti:
+    - Fila superior: PCA del espacio latente de cada modelo (coloreado por persona)
+    - Fila inferior: muestras aleatorias decodificadas (AE desde su rango, VAE desde N(0,I))
+    """
+    rng = np.random.default_rng(1)
+    shape = (size, size)
+
+    # Proyección PCA 2D de ambos espacios latentes
+    def pca2d(z):
+        z_c = z - z.mean(axis=0)
+        cov = z_c.T @ z_c / (len(z_c) - 1)
+        vals, vecs = np.linalg.eigh(cov)
+        order = np.argsort(vals)[::-1]
+        return z_c @ vecs[:, order[:2]], vals[order[:2]] / vals.sum()
+
+    proj_ae,  ratio_ae  = pca2d(latent_ae)
+    proj_vae, ratio_vae = pca2d(latent_vae)
+
+    # Muestras: AE desde bounding box del latente, VAE desde prior N(0,I)
+    z_ae = np.stack([
+        rng.uniform(latent_ae[:, d].min(), latent_ae[:, d].max(), n_samples)
+        for d in range(latent_ae.shape[1])
+    ], axis=1)
+    z_vae = rng.standard_normal((n_samples, vae_model.latent_dim))
+    gen_ae  = ae_model.decode(z_ae)
+    gen_vae = vae_model.decode(z_vae)
+
+    fig = plt.figure(figsize=(14, 8))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.6, 1], hspace=0.35, wspace=0.3)
+
+    # PCA — AE
+    ax_ae = fig.add_subplot(gs[0, 0])
+    sc = ax_ae.scatter(proj_ae[:, 0], proj_ae[:, 1],
+                       c=labels, cmap="tab20", s=40, alpha=0.8)
+    ax_ae.set_title(
+        f"Espacio latente AE — PCA\nPC1={ratio_ae[0]*100:.1f}%  PC2={ratio_ae[1]*100:.1f}%",
+        fontsize=10)
+    ax_ae.set_xlabel("PC1"); ax_ae.set_ylabel("PC2")
+    ax_ae.grid(True, alpha=0.3)
+
+    # PCA — VAE
+    ax_vae = fig.add_subplot(gs[0, 1])
+    ax_vae.scatter(proj_vae[:, 0], proj_vae[:, 1],
+                   c=labels, cmap="tab20", s=40, alpha=0.8)
+    ax_vae.set_title(
+        f"Espacio latente VAE — PCA\nPC1={ratio_vae[0]*100:.1f}%  PC2={ratio_vae[1]*100:.1f}%",
+        fontsize=10)
+    ax_vae.set_xlabel("PC1"); ax_vae.set_ylabel("PC2")
+    ax_vae.grid(True, alpha=0.3)
+    plt.colorbar(sc, ax=ax_vae, label="Persona", ticks=range(0, 40, 10))
+
+    # Muestras — fila inferior
+    gs_bot = gs[1, :].subgridspec(2, n_samples, hspace=0.05, wspace=0.05)
+    for i in range(n_samples):
+        for row, (gen, label) in enumerate([(gen_ae, "AE"), (gen_vae, "VAE")]):
+            ax = fig.add_subplot(gs_bot[row, i])
+            ax.imshow(gen[i].reshape(shape), cmap="gray", vmin=0, vmax=1)
+            ax.axis("off")
+            if i == 0:
+                ax.set_ylabel(label, fontsize=8, rotation=0, labelpad=28, va="center")
+
+    fig.suptitle("AE vs VAE — estructura latente y calidad generativa (Olivetti)", fontsize=12)
     if filename:
         _save(filename)
