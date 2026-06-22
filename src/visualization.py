@@ -1099,3 +1099,88 @@ def plot_ae_vs_vae_olivetti(
     fig.suptitle("AE vs VAE — estructura latente y calidad generativa (Olivetti)", fontsize=12)
     if filename:
         _save(filename)
+
+
+def plot_vae_latent_study(
+    results: dict,
+    data: np.ndarray,
+    labels: np.ndarray,
+    size: int = 32,
+    n_samples: int = 8,
+    filename: str | None = None,
+) -> None:
+    """
+    Resumen del estudio ceteris paribus de dimensión latente del VAE.
+
+    Fila 1: curvas de recon loss por config
+    Fila 2: curvas de KL por config
+    Fila 3: barra de MSE de reconstrucción final
+    Fila 4: muestras del prior por config (n_samples caras)
+    """
+    configs = list(results.keys())
+    n = len(configs)
+    colors = plt.cm.tab10.colors
+    shape = (size, size)
+
+    fig = plt.figure(figsize=(max(14, n * 2.2), 14))
+    gs = fig.add_gridspec(4, n, height_ratios=[2, 2, 1.5, 1.5],
+                          hspace=0.55, wspace=0.35)
+
+    # Filas 1 y 2: curvas de recon y KL — cada config en su columna
+    for i, (name, r) in enumerate(results.items()):
+        h = r["history"]
+        c = colors[i % len(colors)]
+
+        ax_r = fig.add_subplot(gs[0, i])
+        ax_r.semilogy(h["recon"], color=c, alpha=0.9)
+        if h.get("converged_at"):
+            ax_r.axvline(h["converged_at"], color="gray", linestyle=":", alpha=0.6)
+        ax_r.set_title(f"{name}\nrecon={r['mse']:.5f}", fontsize=9)
+        ax_r.set_xlabel("Época", fontsize=7)
+        ax_r.grid(True, alpha=0.3)
+        if i == 0:
+            ax_r.set_ylabel("Recon loss (log)", fontsize=8)
+
+        ax_k = fig.add_subplot(gs[1, i])
+        ax_k.plot(h["kl"], color=c, alpha=0.9)
+        if h.get("converged_at"):
+            ax_k.axvline(h["converged_at"], color="gray", linestyle=":", alpha=0.6)
+        ax_k.set_title(f"KL final = {h['kl'][-1]:.3f}", fontsize=9)
+        ax_k.set_xlabel("Época", fontsize=7)
+        ax_k.grid(True, alpha=0.3)
+        if i == 0:
+            ax_k.set_ylabel("KL divergence", fontsize=8)
+
+    # Fila 3: barras de MSE final
+    ax_bar = fig.add_subplot(gs[2, :])
+    mses = [r["mse"] for r in results.values()]
+    bar_colors = [colors[i % len(colors)] for i in range(n)]
+    bars = ax_bar.bar(range(n), mses, color=bar_colors, alpha=0.85)
+    ax_bar.set_xticks(range(n))
+    ax_bar.set_xticklabels(configs, fontsize=10)
+    ax_bar.set_ylabel("MSE reconstrucción")
+    ax_bar.set_title("Comparación MSE final — menor es mejor", fontsize=10)
+    ax_bar.grid(True, axis="y", alpha=0.3)
+    for bar, v in zip(bars, mses):
+        ax_bar.text(bar.get_x() + bar.get_width() / 2, v * 1.02,
+                    f"{v:.5f}", ha="center", fontsize=9)
+
+    # Fila 4: muestras del prior — una subfila por config
+    rng = np.random.default_rng(0)
+    for i, (name, r) in enumerate(results.items()):
+        model = r["model"]
+        z = rng.standard_normal((n_samples, model.latent_dim))
+        samples = model.decode(z)
+        gs_row = gs[3, i].subgridspec(1, n_samples, wspace=0.05)
+        for j in range(n_samples):
+            ax = fig.add_subplot(gs_row[0, j])
+            ax.imshow(samples[j].reshape(shape), cmap="gray", vmin=0, vmax=1)
+            ax.axis("off")
+        # Etiqueta a la izquierda de la primera imagen
+        fig.add_subplot(gs[3, i]).set_ylabel(
+            name, fontsize=8, rotation=0, labelpad=40, va="center"
+        )
+
+    fig.suptitle("Estudio ceteris paribus — Dimensión latente VAE (Olivetti)", fontsize=13)
+    if filename:
+        _save(filename)

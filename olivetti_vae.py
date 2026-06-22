@@ -29,8 +29,8 @@ from src.visualization import (
 
 SEED     = 42
 SIZE     = 32
-LATENT   = 8
-BETA     = 0.008   # β_natural ≈ L/F = 8/1024
+LATENT   = 32
+BETA     = 0.03125  # β_natural = L/F = 32/1024
 WARMUP   = 2_000
 EPOCHS   = 10_000
 BATCH    = 50
